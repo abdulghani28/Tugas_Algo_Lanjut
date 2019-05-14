@@ -1,0 +1,749 @@
+////////////////////////////////////////////////////////////////
+//// Proyek Akhir Algoritma dan Pemrograman Lanjut          ////
+//// Nama  : 1. M. Rusdi Lubis (123180002)					////
+////		 2. Muhammad Abdul Ghani (123180020)		    ////
+//// Kelas : A												////
+////////////////////////////////////////////////////////////////
+
+#include <iostream>
+#include <cstring>
+#include <string.h>
+#include <stdio.h>
+
+using namespace std;
+
+FILE *file;
+
+typedef struct{
+	char ketm[30], ketk[30];
+	int tglm, blnm, thnm, masuk, keluar;
+	int tglk, blnk, thnk;
+	char nom[5], nok[5];
+	}manajemen;
+	
+manajemen data;
+	int byk, dat, total_keluar=0, total_masuk=0, total_akhir=0, cari, mk1, mk2;
+	char carinom[5], carinok[5];
+	int caritglm, cariblnm, carithnm, caritglk, cariblnk, carithnk;
+	char back;
+	char tambah, namafile[20], namafile2[20];
+
+void pemasukkan();
+void pengeluaran();
+void tampil();
+void search();
+void seq_masuk();
+void seq_keluar();
+void merge_sm(manajemen *in, int low, int high, int mid);
+void merge_sortm(manajemen *in, int low, int high);
+void merge_sk(manajemen *out, int low, int high, int mid);
+void merge_sortk(manajemen *out, int low, int high);
+
+int main(){
+	do{
+	int pilih;
+		system("cls");
+	cout<<"\n\t\t   PROGRAM MANAGEMEN KEUANGAN\n";
+	cout<<"\t\t\tTOKO FERNITURE\n";
+	cout<<"\t==================================================\n";
+	cout<<"\t||1. Input Pemasukkan\t\t\t\t||\n";
+	cout<<"\t||2. Input Pengeluaran\t\t\t\t||\n";
+	cout<<"\t||3. Tampilkan Transaksi Secara Urut\t\t||\n";
+	cout<<"\t||4. Cari Transaksi\t\t\t\t||\n";
+	cout<<"\t||5. Keluar\t\t\t\t\t||\n";
+	cout<<"\t==================================================\n";
+	cout<<">>>>>Masukkan Pilihan : ";cin>>pilih;
+		system("cls");
+	switch (pilih)
+	{
+		case 1:
+			pemasukkan();
+			break;
+		case 2:
+			pengeluaran();
+			break;
+		case 3:
+			tampil();
+			break;
+		case 4:
+			search();
+			break;
+		case 5:
+			cout<<"Terima Kasih";
+			exit(0);
+			break;
+		default:
+		system("cls");
+		cout<<"Pilihan Tidak Tersedia\n";
+			break;
+	}
+	cout<<"\nKembali ke menu (y/n) : ";cin>>back;
+	}while(back=='y'||back=='Y');
+	
+}
+
+void pemasukkan()
+{
+	cout<<"Input file pemasukkan : ";cin>>namafile;
+	file=fopen(namafile,"w");
+	cout<<"Jumlah transaksi\t : ";cin>>dat;
+	fwrite(&dat, sizeof(dat), 1, file);
+	for (int i = 0; i < dat; i++)
+	{
+		cout<<"Nomor Transaksi\t\t : ";cin>>data.nom;
+		cout<<"Keterangan Transaksi\t : ";cin.ignore();cin.getline(data.ketm, sizeof(data.ketm));
+		cout<<"Jumlah Pemasukan\t : Rp ";cin>>data.masuk;
+		cout<<"Tanggal Pemasukan\t : ";cin>>data.tglm;
+		cout<<"Bulan Pemasukan\t\t : ";cin>>data.blnm;
+		cout<<"Tahun Pemasukan\t\t : ";cin>>data.thnm;
+		fwrite(&data, sizeof(data), 1, file);
+	}
+	fclose(file);
+}
+
+void pengeluaran()
+{
+	cout<<"Input file pengeluaran : ";cin>>namafile2;
+	file=fopen(namafile2, "w");
+	cout<<"Jumlah transaksi\t : ";cin>>dat;
+	fwrite(&dat, sizeof(dat), 1, file);
+	for (int i = 0; i < dat; i++)
+	{
+		cout<<"Nomor Transaksi\t\t : ";cin>>data.nok;
+		cout<<"Keterangan Transaksi\t : ";cin.ignore();cin.getline(data.ketk, sizeof(data.ketk));
+		cout<<"Jumlah Pengeluaran\t : Rp ";cin>>data.keluar;
+		//cout<<"Tanggal Pengeluaran\t : \n";
+		cout<<"Tanggal Pengeluaran\t : ";cin>>data.tglk;
+		cout<<"Bulan Pengeluaran\t : ";cin>>data.blnk;
+		cout<<"Tahun Pengeluaran\t : ";cin>>data.thnk;
+		fwrite(&data, sizeof(data), 1, file);
+	}
+	fclose(file);
+}
+
+void tampil(){
+	manajemen in[100], out[100], temp;
+	char input, a=0, b=0;
+
+	cout<<"Ingin input file pemasukkan (y/n) ? : ";cin>>input;
+	if (input=='y')
+	{
+		cout<<"File pemasukkan : ";cin>>namafile;
+		a=a+1;
+	}
+
+	cout<<"Ingin input file pengeluaran (y/n) ? : ";cin>>input;
+	if (input=='y')
+	{
+		cout<<"File pengeluaran : ";cin>>namafile2;
+		b=b+1;
+	}
+	
+	if ((a==1)&&(b!=1))
+	{
+		file=fopen(namafile,"r");
+		fread(&dat, sizeof(dat), 1, file);
+		for (int i = 0; i < dat; i++)
+		{	
+			fread(&data, sizeof(data), 1, file);
+			in[i]=data;
+		}
+		
+		for (int i=0; i<dat-1; i++) 
+		{ 
+			for (int j=i+1; j<dat; j++) 
+			{ 
+				if (in[i].thnm > in[j].thnm) 
+				{ 
+					temp = in[i]; 
+					in[i] = in[j]; 
+					in[j] = temp; 
+				} 
+				else if (in[i].thnm == in[j].thnm && in[i].blnm > in[j].blnm) 
+				{ 
+					temp = in[i]; 
+					in[i] = in[j]; 
+					in[j] = temp; 
+				} 
+				else if (in[i].thnm == in[j].thnm && in[i].blnm == in[j].blnm && in[i].tglm > in[j].tglm) 
+				{ 
+					temp = in[i]; 
+					in[i] = in[j]; 
+					in[j] = temp; 
+				} 
+	  
+			}
+	 
+		}
+		cout<<"\nPEMASUKAN :\n";
+		for (int i = 0; i < dat; i++)
+		{
+			cout<<"\nNo. Transaksi\t\t : "<<in[i].nom;
+			cout<<"\nTransaksi\t\t : "<<in[i].ketm;
+			cout<<"\nTanggal\t\t\t : "<<in[i].tglm<<"-"<<in[i].blnm<<"-"<<in[i].thnm;
+			cout<<"\nJumlah Pemasukkan\t : Rp "<<in[i].masuk;
+			total_masuk=total_masuk+in[i].masuk;
+		}
+		cout<<"\nTotal Pemasukkan\t : Rp "<<total_masuk;
+		fclose(file);
+	}
+		
+	else if ((a!=1)&&(b==1))
+	{
+		file=fopen(namafile2,"r");
+		fread(&dat, sizeof(dat), 1, file);
+		
+		for (int i = 0; i < dat; i++)
+		{
+			fread(&data, sizeof(data), 1, file);
+			out[i]=data;
+		}
+		
+		for (int i=0; i<dat-1; i++) 
+		{ 
+			for (int j=i+1; j<dat; j++) 
+			{ 
+				if (out[i].thnk > out[j].thnk) 
+				{ 
+					temp = out[i]; 
+					out[i] = out[j]; 
+					out[j] = temp; 
+				} 
+				else if (in[i].thnk == in[j].thnk && in[i].blnk > in[j].blnk) 
+				{ 
+					temp = out[i]; 
+					out[i] = out[j]; 
+					out[j] = temp; 
+				} 
+				else if (in[i].thnk == in[j].thnk && in[i].blnk == in[j].blnk && in[i].tglk > in[j].tglk) 
+				{ 
+					temp = out[i]; 
+					out[i] = out[j]; 
+					out[j] = temp; 
+				} 
+	  
+			}
+	 
+		}
+		cout<<"\n\nPENGELUARAN :";
+		for (int i = 0; i < dat; i++)
+		{
+			cout<<"\nNo.Transaksi\t\t : "<<out[i].nok;
+			cout<<"\nTransaksi\t\t : "<<out[i].ketk;
+			cout<<"\nTanggal\t\t\t : "<<out[i].tglk<<"-"<<out[i].blnk<<"-"<<out[i].thnk;
+			cout<<"\nJumlah Pengeluaran\t : Rp "<<out[i].keluar;
+			total_keluar=total_keluar+out[i].keluar;
+		}
+		cout<<"\nTotal Pengeluaran\t : "<<total_keluar;
+		fclose(file);
+	}
+
+	else if ((a!=1)&&(b!=1))
+	{
+		cout<<"File Tidak Tersedia : ";
+	}
+
+	else
+	{
+		file=fopen(namafile,"r");
+		fread(&dat, sizeof(dat), 1, file);
+		
+		for (int i = 0; i < dat; i++)
+		{	
+			fread(&data, sizeof(data), 1, file);
+			in[i]=data;
+		}
+		
+		for (int i=0; i<dat-1; i++) 
+		{ 
+			for (int j=i+1; j<dat; j++) 
+			{ 
+				if (in[i].thnm > in[j].thnm) 
+				{ 
+					temp = in[i]; 
+					in[i] = in[j]; 
+					in[j] = temp; 
+				} 
+				else if (in[i].thnm == in[j].thnm && in[i].blnm > in[j].blnm) 
+				{ 
+					temp = in[i]; 
+					in[i] = in[j]; 
+					in[j] = temp; 
+				} 
+				else if (in[i].thnm == in[j].thnm && in[i].blnm == in[j].blnm && in[i].tglm > in[j].tglm) 
+				{ 
+					temp = in[i]; 
+					in[i] = in[j]; 
+					in[j] = temp; 
+				} 
+	  
+			}
+	 
+		}
+		cout<<"\nPEMASUKAN :\n";
+		for (int i = 0; i < dat; i++)
+		{
+			cout<<"\nNo. Transaksi\t\t : "<<in[i].nom;
+			cout<<"\nTransaksi\t\t : "<<in[i].ketm;
+			cout<<"\nTanggal\t\t\t : "<<in[i].tglm<<"-"<<in[i].blnm<<"-"<<in[i].thnm;
+			cout<<"\nJumlah Pemasukkan\t : Rp "<<in[i].masuk;
+			total_masuk=total_masuk+in[i].masuk;
+		}
+		cout<<"\nTotal Pemasukkan\t : Rp "<<total_masuk;
+		fclose(file);
+		
+		file=fopen(namafile2,"r");
+		fread(&dat, sizeof(dat), 1, file);
+		
+		for (int i = 0; i < dat; i++)
+		{
+			fread(&data, sizeof(data), 1, file);
+			out[i]=data;
+		}
+		
+		for (int i=0; i<dat-1; i++) 
+		{ 
+			for (int j=i+1; j<dat; j++) 
+			{ 
+				if (out[i].thnk > out[j].thnk) 
+				{ 
+					temp = out[i]; 
+					out[i] = out[j]; 
+					out[j] = temp; 
+				} 
+				else if (in[i].thnk == in[j].thnk && in[i].blnk > in[j].blnk) 
+				{ 
+					temp = out[i]; 
+					out[i] = out[j]; 
+					out[j] = temp; 
+				} 
+				else if (in[i].thnk == in[j].thnk && in[i].blnk == in[j].blnk && in[i].tglk > in[j].tglk) 
+				{ 
+					temp = out[i]; 
+					out[i] = out[j]; 
+					out[j] = temp; 
+				} 
+	  
+			}
+ 
+		}
+	cout<<"\n\nPENGELUARAN :";
+	for (int i = 0; i < dat; i++)
+	{
+		cout<<"\nNo.Transaksi\t\t : "<<out[i].nok;
+		cout<<"\nTransaksi\t\t : "<<out[i].ketk;
+		cout<<"\nTanggal\t\t\t : "<<out[i].tglk<<"-"<<out[i].blnk<<"-"<<out[i].thnk;
+		cout<<"\nJumlah Pengeluaran\t : Rp "<<out[i].keluar;
+		total_keluar=total_keluar+out[i].keluar;
+	}
+	cout<<"\nTotal Pengeluaran\t : "<<total_keluar;
+	fclose(file);
+	total_akhir=total_masuk-total_keluar;
+	cout<<"\n\nTotal Saldo\t\t : Rp "<<total_akhir;
+	}
+}
+
+void search(){
+	int jumlah;
+	cout<<"1. Cari No.Transaksi\n";
+	cout<<"2. Tanggal Transaksi\n";
+	cout<<"Pilih : ";cin>>cari;
+	system("cls");
+	switch (cari)
+	{
+		case 1:
+			{
+			cout<<"1. Pemasukkan\n";
+			cout<<"2. Pengeluaran\n";
+			cout<<"Pilih : ";cin>>mk1;
+			system("cls");
+			switch (mk1)
+			{
+				case 1:
+				{
+					cout<<"Buka File Pemasukkan : ";cin>>namafile;
+					file=fopen(namafile,"r");
+					fread(&dat, sizeof(dat), 1, file);
+					
+					jumlah=dat;
+					
+					manajemen in[dat];
+					
+					for (int i = 0; i < dat; i++)
+					{
+						fread(&data, sizeof(data), 1, file);
+						in[i]=data;
+					}
+					
+					merge_sortm(in, 0, jumlah-1);
+					cout<<"\n>>>>Data Pemasukkan<<<\n";
+
+					for (int i = 0; i < dat; i++)
+					{
+						cout<<"\nNo.Transaksi yang tersedia \t : "<<in[i].nom;
+					}
+					fclose(file);
+					
+					cout<<"\nNo Transaksi yang Dicari\t : ";cin>>carinom;
+					bool ada=false;
+					int i=0;
+					while ((!ada)&&(i<dat))
+					{
+						if (strcmp(carinom, in[i].nom)==0)
+						{
+							ada=true;
+						}
+						else
+						{
+							i++;
+						}
+					}
+					if (ada)
+					{
+						cout<<"\nTransaksi\t\t\t : "<<in[i].ketm;
+						cout<<"\nTanggal\t\t\t\t : "<<in[i].tglm<<"-"<<in[i].blnm<<"-"<<in[i].thnm;
+						cout<<"\nJumlah Pemasukkan\t\t : Rp "<<in[i].masuk;
+					}
+					else
+					{
+						cout<<"\nTransaksi yang anda cari tidak ditemukan\n";
+					}
+					break;
+				}
+				case 2:
+				{	
+					manajemen out[100];
+					cout<<"Buka File Pengeluaran : ";cin>>namafile;
+					file=fopen(namafile,"r");
+					fread(&dat, sizeof(dat), 1, file);
+					
+					jumlah=dat;
+					
+					for (int i = 0; i < dat; i++)
+					{
+						fread(&data, sizeof(data), 1, file);
+						out[i]=data;
+					}
+					
+					merge_sortk(out, 0, jumlah-1);
+					
+					cout<<"\n>>>Data Pengeluaran<<<\n";
+					
+					for (int i = 0; i < dat; i++)
+					{
+						cout<<"\nNo.Transaksi yang tersedia\t\t : "<<out[i].nok;
+					}
+					
+					merge_sortk(out, 0, jumlah-1);
+					
+					cout<<"\nNo Transaksi yang Dicari\t\t : ";cin>>carinok;
+					bool ada=false;
+					int i=0;
+					while ((!ada)&&(i<dat))
+					{
+						if (strcmp(carinok, out[i].nok)==0)
+						{
+							ada=true;
+						}
+						else
+						{
+							i++;
+						}
+					}
+					if (ada)
+					{
+						cout<<"\nTransaksi\t\t\t\t : "<<out[i].ketk;
+						cout<<"\nTanggal\t\t\t\t\t : "<<out[i].tglk<<"-"<<out[i].blnk<<"-"<<out[i].thnk;
+						cout<<"\nJumlah Pengeluaran\t\t\t : Rp "<<out[i].keluar;
+					}
+					else
+					{
+						cout<<"\nTransaksi yang anda cari tidak ditemukan\n";
+					}
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 2:
+		{
+			cout<<"1. Pemasukkan\n";
+			cout<<"2. Pengeluaran\n";
+			cout<<"Pilih : ";cin>>mk2;
+			switch (mk2)
+			{
+				case 1:
+				{
+					cout<<"Buka File Pemasukkan : ";cin>>namafile;
+					file=fopen(namafile,"r");
+					fread(&dat, sizeof(dat), 1, file);
+										
+					manajemen in[dat];
+					
+					for (int i = 0; i < dat; i++)
+					{
+						fread(&data, sizeof(data), 1, file);
+						in[i]=data;
+					}
+					
+					manajemen temp;
+					for (int i=0; i<dat-1; i++) 
+					{ 
+						for (int j=i+1; j<dat; j++) 
+						{ 
+							if (in[i].thnm > in[j].thnm) 
+							{ 
+								temp = in[i]; 
+								in[i] = in[j]; 
+								in[j] = temp; 
+							} 
+							else if (in[i].thnm == in[j].thnm && in[i].blnm > in[j].blnm) 
+							{ 
+								temp = in[i]; 
+								in[i] = in[j]; 
+								in[j] = temp; 
+							} 
+							else if (in[i].thnm == in[j].thnm && in[i].blnm == in[j].blnm && in[i].tglm > in[j].tglm) 
+							{ 
+								temp = in[i]; 
+								in[i] = in[j]; 
+								in[j] = temp; 
+							} 
+				  
+						}
+					}
+						for (int i = 0; i < dat; i++)
+						{
+							cout<<"\nTanggal Transaksi\t\t : "<<in[i].tglm<<"-"<<in[i].blnm<<"-"<<in[i].thnm;
+						}
+						fclose(file);
+						
+						cout<<"\nTanggal yang Dicari\t\t : ";cin>>caritglm;
+						cout<<"\nBulan yang Dicari\t\t : ";cin>>cariblnm;
+						cout<<"\nTahun yang Dicari\t\t : ";cin>>carithnm;
+						bool ada=false;
+						int i=0;
+						while ((!ada)&&(i<dat))
+						{
+							if ((caritglm==in[i].tglm)&&(cariblnm==in[i].blnm)&&(carithnm==in[i].thnm))
+							{
+								ada=true;
+							}
+							else
+							{
+								i++;
+							}
+						}
+						if (ada)
+						{
+							cout<<"\nTransaksi\t\t\t : "<<in[i].ketm;
+							cout<<"\nTanggal\t\t\t\t : "<<in[i].tglm<<"-"<<in[i].blnm<<"-"<<in[i].thnm;
+							cout<<"\nJumlah Pemasukkan\t\t : Rp "<<in[i].masuk;
+						}
+						else
+						{
+							cout<<"\nTransaksi yang anda cari tidak ditemukan\n";
+						}
+					break;
+				}
+				case 2:
+				{
+				manajemen out[100];
+				cout<<"Buka File Pengeluaran : ";cin>>namafile;
+				file=fopen(namafile,"r");
+				fread(&dat, sizeof(dat), 1, file);
+				
+				jumlah=dat;
+				
+				for (int i = 0; i < dat; i++)
+				{
+					fread(&data, sizeof(data), 1, file);
+					out[i]=data;
+				}
+				fclose(file);
+				
+				manajemen temp;
+				for (int i=0; i<dat-1; i++) 
+				{ 
+					for (int j=i+1; j<dat; j++) 
+					{ 
+						if (out[i].thnk > out[j].thnk) 
+						{ 
+							temp = out[i]; 
+							out[i] = out[j]; 
+							out[j] = temp; 
+						} 
+						else if (out[i].thnk == out[j].thnk && out[i].blnk > out[j].blnk) 
+						{ 
+							temp = out[i]; 
+							out[i] = out[j]; 
+							out[j] = temp; 
+						} 
+						else if (out[i].thnk == out[j].thnk && out[i].blnk == out[j].blnk && out[i].tglk > out[j].tglk) 
+						{ 
+							temp = out[i]; 
+							out[i] = out[j]; 
+							out[j] = temp; 
+						} 
+			  
+					}
+				}
+					for (int i = 0; i < dat; i++)
+					{
+						cout<<"\nTanggal Transaksi\t\t : "<<out[i].tglk<<"-"<<out[i].blnk<<"-"<<out[i].thnk;
+					}
+					cout<<"\nTanggal yang Dicari\t\t : ";cin>>caritglk;
+					cout<<"\nBulan yang Dicari\t\t : ";cin>>cariblnk;
+					cout<<"\nTahun yang Dicari\t\t : ";cin>>carithnk;
+					bool ada=false;
+					int i=0;
+					while ((!ada)&&(i<dat))
+					{
+						if ((caritglk==out[i].tglk)&&(cariblnk==out[i].blnk)&&(carithnk==out[i].thnk))
+						{
+							ada=true;
+						}
+						else
+						{
+							i++;
+						}
+					}
+					if (ada)
+					{
+						cout<<"\nTransaksi\t\t\t : "<<out[i].ketk;
+						cout<<"\nTanggal\t\t\t\t : "<<out[i].tglk<<"-"<<out[i].blnk<<"-"<<out[i].thnk;
+						cout<<"\nJumlah Pengeluaran\t\t : Rp "<<out[i].keluar;
+					}
+					else
+					{
+						cout<<"\nTransaksi yang anda cari tidak ditemukan\n";
+					}
+					break;
+				}
+				break;
+			}
+	}
+}
+}
+
+void merge_sm(manajemen *in, int low, int high, int mid)
+{
+	
+	int i, j, k;
+	manajemen temp[high-low+1];
+	i = low;
+	k = 0;
+	j = mid + 1;
+ 
+	while (i <= mid && j <= high)
+	{
+		if (strcmp(in[i].nom , in[j].nom)<0)
+		{
+			temp[k] = in[i];
+			k++;
+			i++;
+		}
+		else
+		{
+			temp[k] = in[j];
+			k++;
+			j++;
+		}
+	}
+ 
+	while (i <= mid)
+	{
+		temp[k] = in[i];
+		k++;
+		i++;
+	}
+ 
+	while (j <= high)
+	{
+		temp[k] = in[j];
+		k++;
+		j++;
+	}
+ 
+ 
+	for (i = low; i <= high; i++)
+	{
+		in[i] = temp[i-low];
+	}	
+}
+ 
+void merge_sortm(manajemen *in, int low, int high)
+{
+	int mid;
+	if (low < high)
+	{
+		mid=(low+high)/2;
+		merge_sortm(in, low, mid);
+		merge_sortm(in, mid+1, high);
+ 
+		merge_sm(in, low, high, mid);
+	}
+}
+
+void merge_sk(manajemen *out, int low, int high, int mid)
+{
+	
+	int i, j, k;
+	manajemen temp[high-low+1];
+	i = low;
+	k = 0;
+	j = mid + 1;
+ 
+	while (i <= mid && j <= high)
+	{
+		if (strcmp(out[i].nok , out[j].nok)<0)
+		{
+			temp[k] = out[i];
+			k++;
+			i++;
+		}
+		else
+		{
+			temp[k] = out[j];
+			k++;
+			j++;
+		}
+	}
+ 
+	while (i <= mid)
+	{
+		temp[k] = out[i];
+		k++;
+		i++;
+	}
+ 
+	while (j <= high)
+	{
+		temp[k] = out[j];
+		k++;
+		j++;
+	}
+ 
+ 
+	for (i = low; i <= high; i++)
+	{
+		out[i] = temp[i-low];
+	}
+	
+	fclose(file);
+	
+}
+ 
+void merge_sortk(manajemen *out, int low, int high)
+{
+	int mid;
+	if (low < high)
+	{
+		mid=(low+high)/2;
+		merge_sortk(out, low, mid);
+		merge_sortk(out, mid+1, high);
+ 
+		merge_sk(out, low, high, mid);
+	}
+}
