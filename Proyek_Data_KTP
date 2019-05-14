@@ -19,7 +19,7 @@ kartu ktp;
 	
 int dat, jumlah;
 char tambah, cek;
-char carinama[100];
+char carinama[100], xxx[100], yyy[100];
 char namafile[20], namafile2[20];
 char mode[5];
 unsigned long carinik;
@@ -41,9 +41,6 @@ void bubble_sortn(kartu isi[], int size);
 void selection_sortn(kartu isi[], int size);
 void insert_sortn(kartu isi[], int size);
 void shell_sortn(kartu isi[], int size);
-void quick_sortn(kartu isi[], int first, int last);
-void merge_sn(kartu *isi, int low, int mid, int high);
-void merge_sortn(kartu *isi, int low, int high);
 void transaksi();
 void merging_sambung();
 void merging_urut();
@@ -414,7 +411,6 @@ void insert_sort(kartu isi[], int size){
 				}
 
 				fclose(filein);
-			//cout << "\n==============================================================" <<endl;
 			cout << "DATA TELAH DISIMPAN !!\n" << endl;
 }
 
@@ -499,6 +495,7 @@ void merge_sort(kartu *isi, int low, int high)
 		merge_s(isi, low, high, mid);
 	}
 }
+
 void quick_sort(kartu isi[], int first, int last){
     filein = fopen(namafile,"w");
     fwrite(&dat,sizeof(dat),1,filein);
@@ -551,27 +548,19 @@ void sequential()
 {
 	filein = fopen(namafile,"r");
 	fread(&dat,sizeof(dat),1,filein);
-
+	int y=0;
 	kartu isi[dat];
-
 	for(int x=0;x<dat;x++){
 		fread(&ktp,sizeof(ktp),1,filein);
         isi[x]=ktp;
     }
-    fclose(filein);
     system("clear");
-    int ada=0, x=0;
-               while(x<dat){
-				if(strcmp(carinama,isi[x].nama)==0){
-				ada++;	}
-				else
+			for (int x = 0; x < dat; x++)
+			{
+				strcpy(yyy,isi[x].nama);
+				strcpy(xxx,carinama);
+				if (strstr(yyy,xxx))
 				{
-					x++;
-				}
-				}
-			
-		if (ada==1)
-		{
 				cout<<"=================================\n";
 				cout<<"\n\nNIK.................... : "<<isi[x].nik;
 				cout<<"\nNama................... : "<<isi[x].nama;
@@ -588,12 +577,18 @@ void sequential()
 				cout<<"\nPekerjaan.............. : "<<isi[x].kerja;
 				cout<<"\nKewarganegaraan........ : "<<isi[x].negara;
 				cout<<"\n\n=================================\n";
-		}
-		else
+				}
+			else
+			{
+				y++;
+			}
+			}
+		if (y==dat)
 		{
-		cout<<"\n==> Maaf, data yang anda cari tidak ditemukan <==\n";			
+			cout<<"\n==> Maaf, data yang anda cari tidak ditemukan <==\n";			
 		}
-	
+	    fclose(filein);
+
 }
 
 void merging_sambung(){
@@ -612,6 +607,7 @@ void merging_sambung(){
     }
     jmData=sumData;
     cout<<"\n----->test file 1 sukses<-----\n";
+	fclose(filein);
     
 	cout<<"Inputkan nama File 2\t: "; cin>>namafile2;
 	
@@ -623,6 +619,7 @@ void merging_sambung(){
         ktpSatu[y] = ktp;
         jmData = jmData + 1;
 	}
+	fclose(filein);
 	
 	cout<<"test file 2 sukses";
 	
@@ -649,7 +646,6 @@ void merging_sambung(){
 				cout<<"\n\n=================================\n";
 		fwrite(&ktpSatu[z],sizeof(ktpSatu[z]),1,filein);
 	}
-	fclose(filein);
 	fclose(filein);
 	}
 
@@ -902,135 +898,6 @@ void insert_sortn(kartu isi[], int size){
 			cout << "DATA TELAH DISIMPAN !!\n" << endl;
 }
 
-void merge_sn(kartu *isi, int low, int high, int mid)
-{
-	int i, j, k;
-	kartu temp[high-low+1];
-	i = low;
-	k = 0;
-	j = mid + 1;
- 
-	while (i <= mid && j <= high)
-	{
-		if (strcmp(isi[i].nama , isi[j].nama)<0)
-		{
-			temp[k] = isi[i];
-			k++;
-			i++;
-		}
-		else
-		{
-			temp[k] = isi[j];
-			k++;
-			j++;
-		}
-	}
- 
-	while (i <= mid)
-	{
-		temp[k] = isi[i];
-		k++;
-		i++;
-	}
- 
-	while (j <= high)
-	{
-		temp[k] = isi[j];
-		k++;
-		j++;
-	}
- 
- 
-	for (i = low; i <= high; i++)
-	{
-		isi[i] = temp[i-low];
-	}
-	kartu ktp[dat];
-    filein = fopen(namafile,"w");
-    fwrite(&dat,sizeof(dat),1,filein);
-    for(int x=0;x<dat;x++){
-        ktp[x]=isi[x];
- 			cout<<"=================================\n";
-			cout<<"\n\nNIK.................... : "<<isi[x].nik;
-			cout<<"\nNama................... : "<<isi[x].nama;
-		/*	cout<<"\nTempat/Tanggal Lahir... : "<<isi[x].tptlahir<<", "<<isi[x].tgl<<" "<<isi[x].bln<<" "<<isi[x].thn;
-			cout<<"\nJenis Kelamin.......... : "<<isi[x].jk;
-			cout<<"\nGolongan Darah......... : "<<isi[x].gd;
-			cout<<"\nAlamat\n";
-			cout<<"\n		RT.............. : "<<isi[x].rt;
-			cout<<"\n		RW.............. : "<<isi[x].rw;
-			cout<<"\n		Desa/Kelurahan.. : "<<isi[x].desa;
-			cout<<"\n		Kecamatan....... : "<<isi[x].kec;
-			cout<<"\nAgama.................. : "<<isi[x].agama;
-			cout<<"\nStatus Perkawinan...... : "<<isi[x].status;
-			cout<<"\nPekerjaan.............. : "<<isi[x].kerja;
-			cout<<"\nKewarganegaraan........ : "<<isi[x].negara;*/
-			cout<<"\n\n=================================\n";
-    }
-    fwrite(&ktp,sizeof(ktp),1,filein);
-    fclose(filein);
-}
- 
-void merge_sortn(kartu *isi, int low, int high)
-{
-	int mid;
-	if (low < high)
-	{
-		mid=(low+high)/2;
-		merge_sortn(isi, low, mid);
-		merge_sortn(isi, mid+1, high);
- 
-		merge_sn(isi, low, high, mid);
-	}
-}
-void quick_sortn(kartu isi[], int first, int last){
-    filein = fopen(namafile,"w");
-    fwrite(&dat,sizeof(dat),1,filein);
-	kartu temp;
-	int low,high;
-	kartu list;
-	low=first;
-	high=last;
-	list=isi[(first+last)/2];
-	do{
-		while(strcmp(isi[low].nama,list.nama)<0){ low++; }
-		while(strcmp(isi[high].nama,list.nama)>0){ high--; }
-
-		if(low<=high){
-			temp = isi[low];
-			isi[low++]=isi[high];
-			isi[high--]=temp;
-        }
-	}while(low<=high);
-
-	if(first<high) quick_sort(isi, first, high);
-	if(low<last) quick_sort(isi, low, last);
-	system("clear");
-    for(int x=0;x<dat;x++){
-		cout<<"=================================\n";
-		cout<<"\n\nNIK.................... : "<<isi[x].nik;
-		cout<<"\nNama................... : "<<isi[x].nama;
-	/*	cout<<"\nTempat/Tanggal Lahir... : "<<isi[x].tptlahir<<", "<<isi[x].tgl<<" "<<isi[x].bln<<" "<<isi[x].thn;
-		cout<<"\nJenis Kelamin.......... : "<<isi[x].jk;
-		cout<<"\nGolongan Darah......... : "<<isi[x].gd;
-		cout<<"\nAlamat\n";
-		cout<<"\n		RT.............. : "<<isi[x].rt;
-		cout<<"\n		RW.............. : "<<isi[x].rw;
-		cout<<"\n		Desa/Kelurahan.. : "<<isi[x].desa;
-		cout<<"\n		Kecamatan....... : "<<isi[x].kec;
-		cout<<"\nAgama.................. : "<<isi[x].agama;
-		cout<<"\nStatus Perkawinan...... : "<<isi[x].status;
-		cout<<"\nPekerjaan.............. : "<<isi[x].kerja;
-		cout<<"\nKewarganegaraan........ : "<<isi[x].negara;*/
-		cout<<"\n\n=================================\n";
-
-        ktp=isi[x];
-        fwrite(&ktp,sizeof(ktp),1,filein);
-    }
-
-    fclose(filein);
-}
-
 void search(){
 		cout<<"===============================================\n";
 		cout<<"|1. Cari Berdasarkan Nama..(Sequential Search)|\n";
@@ -1067,8 +934,6 @@ void search(){
 				cout<<"|2. Selection Sort		|\n";
 				cout<<"|3. Insertion Sort		|\n";
 				cout<<"|4. Shell Sort			|\n";
-				cout<<"|5. Quick Sort			|\n";
-				cout<<"|6. Merge Sort			|\n";
 				cout<<"=================================\n";
 				cout<<"Masukkan Pilihan Anda : ";cin>>pilihurut;
 				switch (pilihurut)
@@ -1088,14 +953,6 @@ void search(){
 					case 4:
 						cout << "File simpan hasil sorting : ";cin>>namafile;
 						shell_sortn(isi, jumlah);
-						break;
-					case 5:
-						cout<<"File simpan hasil sorting : ";cin>>namafile2;
-						quick_sortn(isi, 0, jumlah);
-						break;
-					case 6:
-						cout << "File simpan hasil sorting : ";cin>>namafile;
-						merge_sortn(isi, 0, jumlah-1);
 						break;
 					default :
 					cout<<"\n===== Menu Tidak Tersedia ======\n";					
